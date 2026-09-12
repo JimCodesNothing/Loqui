@@ -22,9 +22,8 @@ ACHIEVEMENTS = [
     {"id": "streak_30",       "name": "Monthly Master",      "icon": "⚡", "desc": "Maintain a 30-day streak",                   "check": lambda df: calc_best_streak(df) >= 30},
     {"id": "multi_method",    "name": "Multi-Channel",       "icon": "📡", "desc": "Use 3+ different methods",                   "check": lambda df: (df["Method"] != "").nunique() >= 3},
     {"id": "multi_location",  "name": "Well-Traveled",       "icon": "🗺️", "desc": "Approach in 5+ different locations",         "check": lambda df: (df["Location"] != "").nunique() >= 5},
-    {"id": "early_bird",      "name": "Early Bird",          "icon": "🌅", "desc": "Log an approach before 9 AM",                "check": lambda df: any(_is_before(df, 9))},
-    {"id": "night_owl",       "name": "Night Owl",           "icon": "🦉", "desc": "Log an approach after 9 PM",                 "check": lambda df: any(_is_after(df, 21))},
-]
+    {"id": "early_bird",      "name": "Early Bird",          "icon": "🌅", "desc": "Log an approach before 9 AM",                "check": lambda df: _is_before(df, 9)},
+    {"id": "night_owl",       "name": "Night Owl",           "icon": "🦉", "desc": "Log an approach after 9 PM",                 "check": lambda df: _is_after(df, 21)},
 
 def _is_before(df, hour):
     try:
