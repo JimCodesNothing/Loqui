@@ -84,10 +84,42 @@ def calc_streaks(df):
 def calc_best_streak(df):
     _, best = calc_streaks(df)
     return best
-
 # ---------- Session state ----------
 if "approach_log" not in st.session_state:
     st.session_state.approach_log = []
+if "current_user" not in st.session_state:
+    st.session_state.current_user = None
+if "show_login" not in st.session_state:
+    st.session_state.show_login = True
+
+# ---------- Login Screen ----------
+if st.session_state.show_login and not st.session_state.current_user:
+    st.title("🎯 Cold Approach Tracker")
+    st.markdown("### Login or Create Account")
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown("**Login**")
+        login_user = st.text_input("Username", key="login_user")
+        login_pass = st.text_input("Password", type="password", key="login_pass")
+        if st.button("Login", use_container_width=True):
+            if login_user and login_pass:
+                st.session_state.current_user = login_user
+                st.session_state.show_login = False
+                load_data()
+                st.rerun()
+    
+    with col2:
+        st.markdown("**Create Account**")
+        new_user = st.text_input("Username", key="new_user")
+        new_pass = st.text_input("Password", type="password", key="new_pass")
+        if st.button("Create Account", use_container_width=True):
+            if new_user and new_pass:
+                st.session_state.current_user = new_user
+                st.session_state.show_login = False
+                st.rerun()
+    
+    st.stop()
 
 # ---------- Helpers ----------
 def to_dataframe():
@@ -103,6 +135,11 @@ def load_from_csv(uploaded_file):
     st.session_state.approach_log = df.to_dict("records")
 
 # ---------- UI ----------
+# Debug: Reset session
+if st.sidebar.button("🔄 Reset Session (Debug)"):
+    for key in list(st.session_state.keys()):
+        del st.session_state[key]
+    st.rerun()
 st.title("🎯 Cold Approach Tracker")
 st.caption("Track every approach. Analyze what works. Close more deals.")
 
