@@ -237,7 +237,7 @@ with tab1:
         followup_val = st.date_input("📅 Follow-up Date", value=None)
     notes_val = st.text_area("📝 Notes", placeholder="Context, conversation details, next steps...", height=100)
     
-    if st.button("✅ Log Approach", type="primary", use_container_width=True):
+        if st.button("✅ Log Approach", type="primary", use_container_width=True):
         if not result_val:
             st.warning("⚠️ Please select a result before logging.")
         else:
@@ -251,11 +251,11 @@ with tab1:
                 "Notes": notes_val.strip(),
                 "FollowUp": followup_val.strftime("%Y-%m-%d") if followup_val else "",
             }
-           st.session_state.approach_log.append(entry)
-save_data()
-play_sound("success")  # 🎵 Play success chime
-st.success(f"✅ Logged! Total: {len(st.session_state.approach_log)}")
-st.rerun()
+            st.session_state.approach_log.append(entry)
+            save_data()
+            play_sound("success")  # 🎵 Play success chime
+            st.success(f"✅ Logged! Total: {len(st.session_state.approach_log)}")
+            st.rerun()
 
 # ===== TAB 2: VIEW ALL =====
 with tab2:
