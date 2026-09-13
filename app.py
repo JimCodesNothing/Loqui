@@ -236,8 +236,8 @@ with tab1:
         result_val = st.selectbox("🎯 Result", options=RESULT_OPTIONS)
         followup_val = st.date_input("📅 Follow-up Date", value=None)
     notes_val = st.text_area("📝 Notes", placeholder="Context, conversation details, next steps...", height=100)
-    
-        if st.button("✅ Log Approach", type="primary", use_container_width=True):
+
+    if st.button("✅ Log Approach", type="primary", use_container_width=True):
         if not result_val:
             st.warning("⚠️ Please select a result before logging.")
         else:
@@ -253,7 +253,7 @@ with tab1:
             }
             st.session_state.approach_log.append(entry)
             save_data()
-            play_sound("success")  # 🎵 Play success chime
+            play_sound("success")
             st.success(f"✅ Logged! Total: {len(st.session_state.approach_log)}")
             st.rerun()
 
