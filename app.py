@@ -333,7 +333,6 @@ with tab4:
     locked = [a for a in ACHIEVEMENTS if a not in unlocked]
     
     st.success(f"You've unlocked **{len(unlocked)} / {len(ACHIEVEMENTS)}** achievements!")
-    
    if unlocked:
     # Check for newly unlocked achievements
     if "last_achievement_count" not in st.session_state:
