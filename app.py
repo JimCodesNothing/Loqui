@@ -3,10 +3,10 @@ import pandas as pd
 import streamlit as st
 import streamlit.components.v1 as components
 
+# ---------- Sound Function ----------
 def play_sound(sound_type="success"):
     """Play a sound using Web Audio API (no files needed)."""
     if sound_type == "success":
-        # Pleasant ascending chime (C5-E5-G5 major chord)
         js_code = """
         <script>
         (function() {
@@ -32,7 +32,6 @@ def play_sound(sound_type="success"):
         </script>
         """
     elif sound_type == "achievement":
-        # Triumphant fanfare (bigger chord)
         js_code = """
         <script>
         (function() {
@@ -58,7 +57,6 @@ def play_sound(sound_type="success"):
         </script>
         """
     elif sound_type == "challenge":
-        # Quick celebratory ding
         js_code = """
         <script>
         (function() {
@@ -79,32 +77,28 @@ def play_sound(sound_type="success"):
         </script>
         """
     components.html(js_code, height=0)
+
 # ---------- Page config ----------
 st.set_page_config(page_title="Cold Approach Tracker", page_icon="🎯", layout="wide")
-# Add this right after st.set_page_config()
-if st.sidebar.button("🔄 Reset Session (Debug)"):
-    for key in list(st.session_state.keys()):
-        del st.session_state[key]
-    st.rerun()
+
 # ---------- Constants ----------
 RESULT_OPTIONS = ["", "Success", "Rejected", "Pending", "No Answer", "Voicemail", "Not Interested", "Callback Scheduled", "Other"]
 METHOD_OPTIONS = ["", "In-Person", "Phone Call", "Email", "LinkedIn DM", "Instagram DM", "Twitter DM", "Text Message", "Other"]
 
-# ---------- Achievement definitions ----------
 ACHIEVEMENTS = [
-    {"id": "first_log",       "name": "First Step",          "icon": "👣", "desc": "Log your first approach",                    "check": lambda df: len(df) >= 1},
-    {"id": "ten_logs",        "name": "Getting Started",     "icon": "🔟", "desc": "Log 10 approaches",                          "check": lambda df: len(df) >= 10},
-    {"id": "fifty_logs",      "name": "Half Century",        "icon": "💯", "desc": "Log 50 approaches",                          "check": lambda df: len(df) >= 50},
-    {"id": "hundred_logs",    "name": "Centurion",           "icon": "🏛️", "desc": "Log 100 approaches",                         "check": lambda df: len(df) >= 100},
-    {"id": "first_success",   "name": "First Win",           "icon": "🎉", "desc": "Get your first success",                     "check": lambda df: (df["Result"] == "Success").any()},
-    {"id": "ten_successes",   "name": "Closer",              "icon": "🤝", "desc": "Get 10 successes",                           "check": lambda df: (df["Result"] == "Success").sum() >= 10},
-    {"id": "fifty_successes", "name": "Sales Machine",       "icon": "🏆", "desc": "Get 50 successes",                           "check": lambda df: (df["Result"] == "Success").sum() >= 50},
-    {"id": "streak_7",        "name": "Week Warrior",        "icon": "🔥", "desc": "Maintain a 7-day streak",                    "check": lambda df: calc_best_streak(df) >= 7},
-    {"id": "streak_30",       "name": "Monthly Master",      "icon": "⚡", "desc": "Maintain a 30-day streak",                   "check": lambda df: calc_best_streak(df) >= 30},
-    {"id": "multi_method",    "name": "Multi-Channel",       "icon": "📡", "desc": "Use 3+ different methods",                   "check": lambda df: (df["Method"] != "").nunique() >= 3},
-    {"id": "multi_location",  "name": "Well-Traveled",       "icon": "🗺️", "desc": "Approach in 5+ different locations",         "check": lambda df: (df["Location"] != "").nunique() >= 5},
-    {"id": "early_bird",      "name": "Early Bird",          "icon": "🌅", "desc": "Log an approach before 9 AM",                "check": lambda df: _is_before(df, 9)},
-    {"id": "night_owl",       "name": "Night Owl",           "icon": "🦉", "desc": "Log an approach after 9 PM",                 "check": lambda df: _is_after(df, 21)},
+    {"id": "first_log", "name": "First Step", "icon": "👣", "desc": "Log your first approach", "check": lambda df: len(df) >= 1},
+    {"id": "ten_logs", "name": "Getting Started", "icon": "🔟", "desc": "Log 10 approaches", "check": lambda df: len(df) >= 10},
+    {"id": "fifty_logs", "name": "Half Century", "icon": "💯", "desc": "Log 50 approaches", "check": lambda df: len(df) >= 50},
+    {"id": "hundred_logs", "name": "Centurion", "icon": "🏛️", "desc": "Log 100 approaches", "check": lambda df: len(df) >= 100},
+    {"id": "first_success", "name": "First Win", "icon": "🎉", "desc": "Get your first success", "check": lambda df: (df["Result"] == "Success").any()},
+    {"id": "ten_successes", "name": "Closer", "icon": "🤝", "desc": "Get 10 successes", "check": lambda df: (df["Result"] == "Success").sum() >= 10},
+    {"id": "fifty_successes", "name": "Sales Machine", "icon": "🏆", "desc": "Get 50 successes", "check": lambda df: (df["Result"] == "Success").sum() >= 50},
+    {"id": "streak_7", "name": "Week Warrior", "icon": "🔥", "desc": "Maintain a 7-day streak", "check": lambda df: calc_best_streak(df) >= 7},
+    {"id": "streak_30", "name": "Monthly Master", "icon": "⚡", "desc": "Maintain a 30-day streak", "check": lambda df: calc_best_streak(df) >= 30},
+    {"id": "multi_method", "name": "Multi-Channel", "icon": "📡", "desc": "Use 3+ different methods", "check": lambda df: (df["Method"] != "").nunique() >= 3},
+    {"id": "multi_location", "name": "Well-Traveled", "icon": "🗺️", "desc": "Approach in 5+ different locations", "check": lambda df: (df["Location"] != "").nunique() >= 5},
+    {"id": "early_bird", "name": "Early Bird", "icon": "🌅", "desc": "Log an approach before 9 AM", "check": lambda df: _is_before(df, 9)},
+    {"id": "night_owl", "name": "Night Owl", "icon": "🦉", "desc": "Log an approach after 9 PM", "check": lambda df: _is_after(df, 21)},
 ]
 
 def _is_before(df, hour):
@@ -119,9 +113,7 @@ def _is_after(df, hour):
     except Exception:
         return False
 
-# ---------- Streak calculation ----------
 def calc_streaks(df):
-    """Returns (current_streak, best_streak)."""
     if df.empty or "Date" not in df.columns:
         return 0, 0
     try:
@@ -131,7 +123,6 @@ def calc_streaks(df):
     if not dates:
         return 0, 0
 
-    # Best streak
     best = 1
     current_run = 1
     for i in range(1, len(dates)):
@@ -141,7 +132,6 @@ def calc_streaks(df):
         else:
             current_run = 1
 
-    # Current streak (must include today or yesterday)
     today = datetime.date.today()
     if dates[-1] == today:
         end = today
@@ -161,6 +151,47 @@ def calc_streaks(df):
 def calc_best_streak(df):
     _, best = calc_streaks(df)
     return best
+
+# ---------- Google Sheets Integration ----------
+@st.cache_resource
+def init_gsheets():
+    try:
+        import gspread
+        from oauth2client.service_account import ServiceAccountCredentials
+        creds_dict = st.secrets["gcp_service_account"]
+        scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+        creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
+        client = gspread.authorize(creds)
+        try:
+            sheet = client.open("Cold Approach Tracker Data").sheet1
+        except gspread.SpreadsheetNotFound:
+            sheet = client.create("Cold Approach Tracker Data").sheet1
+            sheet.append_row(["Date", "Time", "Name", "Location", "Method", "Result", "Notes", "FollowUp", "User"])
+        return sheet
+    except Exception:
+        return None
+
+def save_to_gsheets(df, user):
+    sheet = init_gsheets()
+    if sheet and not df.empty:
+        df_with_user = df.copy()
+        df_with_user["User"] = user
+        sheet.clear()
+        sheet.update([df_with_user.columns.values.tolist()] + df_with_user.values.tolist())
+
+def load_from_gsheets(user=None):
+    sheet = init_gsheets()
+    if sheet:
+        try:
+            data = sheet.get_all_records()
+            df = pd.DataFrame(data)
+            if user and "User" in df.columns:
+                df = df[df["User"] == user]
+            return df
+        except Exception:
+            return pd.DataFrame()
+    return pd.DataFrame()
+
 # ---------- Session state ----------
 if "approach_log" not in st.session_state:
     st.session_state.approach_log = []
@@ -168,6 +199,30 @@ if "current_user" not in st.session_state:
     st.session_state.current_user = None
 if "show_login" not in st.session_state:
     st.session_state.show_login = True
+
+# ---------- Helpers ----------
+def to_dataframe():
+    if not st.session_state.approach_log:
+        return pd.DataFrame(columns=["Date", "Time", "Name", "Location", "Method", "Result", "Notes", "FollowUp"])
+    return pd.DataFrame(st.session_state.approach_log)
+
+def save_data():
+    df = to_dataframe()
+    if st.session_state.current_user:
+        save_to_gsheets(df, st.session_state.current_user)
+
+def load_data():
+    if st.session_state.current_user:
+        df = load_from_gsheets(st.session_state.current_user)
+        if not df.empty:
+            st.session_state.approach_log = df.drop(columns=["User"], errors="ignore").to_dict("records")
+
+def save_to_csv():
+    return to_dataframe().to_csv(index=False).encode("utf-8")
+
+def load_from_csv(uploaded_file):
+    df = pd.read_csv(uploaded_file)
+    st.session_state.approach_log = df.to_dict("records")
 
 # ---------- Login Screen ----------
 if st.session_state.show_login and not st.session_state.current_user:
@@ -195,30 +250,22 @@ if st.session_state.show_login and not st.session_state.current_user:
                 st.session_state.current_user = new_user
                 st.session_state.show_login = False
                 st.rerun()
-    
     st.stop()
 
-# ---------- Helpers ----------
-def to_dataframe():
-    if not st.session_state.approach_log:
-        return pd.DataFrame(columns=["Date", "Time", "Name", "Location", "Method", "Result", "Notes", "FollowUp"])
-    return pd.DataFrame(st.session_state.approach_log)
-
-def save_to_csv():
-    return to_dataframe().to_csv(index=False).encode("utf-8")
-
-def load_from_csv(uploaded_file):
-    df = pd.read_csv(uploaded_file)
-    st.session_state.approach_log = df.to_dict("records")
-
-# ---------- UI ----------
-# Debug: Reset session
+# ---------- Main App ----------
 if st.sidebar.button("🔄 Reset Session (Debug)", key="reset_session_btn"):
     for key in list(st.session_state.keys()):
         del st.session_state[key]
     st.rerun()
+
 st.title("🎯 Cold Approach Tracker")
-st.caption("Track every approach. Analyze what works. Close more deals.")
+st.caption(f"Logged in as: **{st.session_state.current_user}** | Track every approach. Analyze what works. Close more deals.")
+
+if st.sidebar.button("🚪 Logout"):
+    save_data()
+    st.session_state.current_user = None
+    st.session_state.show_login = True
+    st.rerun()
 
 tab1, tab2, tab3, tab4, tab5 = st.tabs(["➕ Log New", "📋 View All", "📊 Stats", "🏆 Gamification", "💾 Save / Load"])
 
@@ -263,16 +310,15 @@ with tab2:
     if df.empty:
         st.info("No approaches logged yet. Go to 'Log New' to add one.")
     else:
-        st.dataframe(df.sort_values(by=["Date", "Time"], ascending=[False, False]),
-                     use_container_width=True, hide_index=True)
+        st.dataframe(df.sort_values(by=["Date", "Time"], ascending=[False, False]), use_container_width=True, hide_index=True)
         st.divider()
         st.subheader("🗑️ Delete an entry")
-        options = [f"{i+1}. {r['Date']} | {r.get('Name', '')} @ {r.get('Location', '')} | {r['Result']}"
-                   for i, r in enumerate(st.session_state.approach_log)]
+        options = [f"{i+1}. {r['Date']} | {r.get('Name', '')} @ {r.get('Location', '')} | {r['Result']}" for i, r in enumerate(st.session_state.approach_log)]
         to_delete = st.selectbox("Select to delete", options=["(none)"] + options)
         if st.button("🗑️ Delete Selected", type="secondary") and to_delete != "(none)":
             idx = options.index(to_delete)
             removed = st.session_state.approach_log.pop(idx)
+            save_data()
             st.success(f"Deleted: {removed.get('Name', 'Unknown')}")
             st.rerun()
 
@@ -303,10 +349,9 @@ with tab3:
         upcoming = df[(df["FollowUp"] != "") & (df["FollowUp"] >= today)]
         if not upcoming.empty:
             st.subheader(f"📅 Upcoming Follow-ups ({len(upcoming)})")
-            st.dataframe(upcoming[["Date", "Name", "Location", "FollowUp", "Result"]],
-                         use_container_width=True, hide_index=True)
+            st.dataframe(upcoming[["Date", "Name", "Location", "FollowUp", "Result"]], use_container_width=True, hide_index=True)
 
-# ===== TAB 4: GAMIFICATION (NEW!) =====
+# ===== TAB 4: GAMIFICATION =====
 with tab4:
     df = to_dataframe()
     current_streak, best_streak = calc_streaks(df)
@@ -316,37 +361,34 @@ with tab4:
     month_total = len(month_df)
     month_successes = len(month_df[month_df["Result"] == "Success"]) if not month_df.empty else 0
     
-    # --- Streaks section ---
     st.subheader("🔥 Streaks")
     c1, c2 = st.columns(2)
-    c1.metric("Current Streak", f"{current_streak} day{'s' if current_streak != 1 else ''}",
-              delta="Keep it going!" if current_streak > 0 else "Log today to start!")
+    c1.metric("Current Streak", f"{current_streak} day{'s' if current_streak != 1 else ''}", delta="Keep it going!" if current_streak > 0 else "Log today to start!")
     c2.metric("Best Streak", f"{best_streak} day{'s' if best_streak != 1 else ''}")
     
     if current_streak > 0:
         st.progress(min(current_streak / 30, 1.0), text=f"Next milestone: 30-day streak ({current_streak}/30)")
     st.divider()
     
-    # --- Achievements section ---
-        st.subheader("🏅 Achievements")
+    st.subheader("🏅 Achievements")
     unlocked = [a for a in ACHIEVEMENTS if a["check"](df)]
     locked = [a for a in ACHIEVEMENTS if a not in unlocked]
-
+    
     st.success(f"You've unlocked **{len(unlocked)} / {len(ACHIEVEMENTS)}** achievements!")
-
+    
     if unlocked:
         if "last_achievement_count" not in st.session_state:
             st.session_state.last_achievement_count = 0
         if len(unlocked) > st.session_state.last_achievement_count:
             play_sound("achievement")
             st.session_state.last_achievement_count = len(unlocked)
-
+        
         st.markdown("**✅ Unlocked:**")
         cols = st.columns(3)
         for i, a in enumerate(unlocked):
             with cols[i % 3]:
                 st.markdown(f"### {a['icon']} {a['name']}\n*{a['desc']}*")
-
+    
     if locked:
         st.markdown("**🔒 Locked:**")
         cols = st.columns(3)
@@ -355,10 +397,8 @@ with tab4:
                 st.markdown(f"### 🔒 {a['name']}\n*{a['desc']}*")
     st.divider()
     
-    # --- Monthly challenges section ---
     st.subheader(f"🎯 Monthly Challenges — {today.strftime('%B %Y')}")
     
-    # Initialize challenge goals in session state
     if "challenge_logs" not in st.session_state:
         st.session_state.challenge_logs = 20
     if "challenge_successes" not in st.session_state:
@@ -367,56 +407,51 @@ with tab4:
         st.session_state.challenge_streak = 7
     
     with st.expander("⚙️ Set your goals"):
-        st.session_state.challenge_logs = st.number_input(
-            "Monthly approaches goal", min_value=1, value=st.session_state.challenge_logs, step=5)
-        st.session_state.challenge_successes = st.number_input(
-            "Monthly successes goal", min_value=1, value=st.session_state.challenge_successes, step=1)
-        st.session_state.challenge_streak = st.number_input(
-            "Streak goal (days)", min_value=1, value=st.session_state.challenge_streak, step=1)
+        st.session_state.challenge_logs = st.number_input("Monthly approaches goal", min_value=1, value=st.session_state.challenge_logs, step=5)
+        st.session_state.challenge_successes = st.number_input("Monthly successes goal", min_value=1, value=st.session_state.challenge_successes, step=1)
+        st.session_state.challenge_streak = st.number_input("Streak goal (days)", min_value=1, value=st.session_state.challenge_streak, step=1)
     
-    # Challenge 1: Monthly logs
     goal1 = st.session_state.challenge_logs
     prog1 = min(month_total / goal1, 1.0)
     st.markdown(f"**📋 Log {goal1} approaches this month**")
     st.progress(prog1, text=f"{month_total} / {goal1}")
     if prog1 >= 1.0:
-    play_sound("challenge")  # 🎵 Play celebration ding
-    st.balloons()
-    st.success("🏆 Challenge complete!")
-    # Challenge 2: Monthly successes
+        play_sound("challenge")
+        st.balloons()
+        st.success("🏆 Challenge complete!")
+    
     goal2 = st.session_state.challenge_successes
     prog2 = min(month_successes / goal2, 1.0)
     st.markdown(f"**🎯 Get {goal2} successes this month**")
     st.progress(prog2, text=f"{month_successes} / {goal2}")
-   if prog2 >= 1.0:
-    play_sound("challenge")  # 🎵 Play celebration ding
-    st.balloons()
-    st.success("🏆 Challenge complete!")
+    if prog2 >= 1.0:
+        play_sound("challenge")
+        st.balloons()
+        st.success("🏆 Challenge complete!")
     
-    # Challenge 3: Streak
     goal3 = st.session_state.challenge_streak
     prog3 = min(current_streak / goal3, 1.0)
     st.markdown(f"**🔥 Maintain a {goal3}-day streak**")
     st.progress(prog3, text=f"{current_streak} / {goal3}")
     if prog3 >= 1.0:
-    play_sound("challenge")  # 🎵 Play celebration ding
-    st.balloons()
-    st.success("🏆 Challenge complete!")
+        play_sound("challenge")
+        st.balloons()
+        st.success("🏆 Challenge complete!")
 
 # ===== TAB 5: SAVE / LOAD =====
 with tab5:
     st.info("💾 Your data is saved in your browser session. Download a CSV backup regularly!")
     col1, col2 = st.columns(2)
     with col1:
-        st.download_button("📥 Download CSV", data=save_to_csv(),
-                           file_name="cold_approach_log.csv", mime="text/csv",
-                           use_container_width=True)
+        st.download_button("📥 Download CSV", data=save_to_csv(), file_name="cold_approach_log.csv", mime="text/csv", use_container_width=True)
     with col2:
         uploaded = st.file_uploader("📤 Load CSV backup", type=["csv"])
         if uploaded and st.button("Import", use_container_width=True):
             load_from_csv(uploaded)
+            save_data()
             st.success(f"Imported {len(st.session_state.approach_log)} entries!")
             st.rerun()
     if st.button("🗑️ Clear All Data", type="secondary"):
         st.session_state.approach_log = []
+        save_data()
         st.rerun()
