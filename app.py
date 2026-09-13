@@ -328,25 +328,25 @@ with tab4:
     st.divider()
     
     # --- Achievements section ---
-    st.subheader("🏅 Achievements")
+        st.subheader("🏅 Achievements")
     unlocked = [a for a in ACHIEVEMENTS if a["check"](df)]
     locked = [a for a in ACHIEVEMENTS if a not in unlocked]
-    
+
     st.success(f"You've unlocked **{len(unlocked)} / {len(ACHIEVEMENTS)}** achievements!")
-   if unlocked:
-    # Check for newly unlocked achievements
-    if "last_achievement_count" not in st.session_state:
-        st.session_state.last_achievement_count = 0
-    if len(unlocked) > st.session_state.last_achievement_count:
-        play_sound("achievement")  # 🎵 Play fanfare for new achievement!
-        st.session_state.last_achievement_count = len(unlocked)
-    
-    st.markdown("**✅ Unlocked:**")
-    cols = st.columns(3)
-    for i, a in enumerate(unlocked):
-        with cols[i % 3]:
-            st.markdown(f"### {a['icon']} {a['name']}\n*{a['desc']}*")
-    
+
+    if unlocked:
+        if "last_achievement_count" not in st.session_state:
+            st.session_state.last_achievement_count = 0
+        if len(unlocked) > st.session_state.last_achievement_count:
+            play_sound("achievement")
+            st.session_state.last_achievement_count = len(unlocked)
+
+        st.markdown("**✅ Unlocked:**")
+        cols = st.columns(3)
+        for i, a in enumerate(unlocked):
+            with cols[i % 3]:
+                st.markdown(f"### {a['icon']} {a['name']}\n*{a['desc']}*")
+
     if locked:
         st.markdown("**🔒 Locked:**")
         cols = st.columns(3)
