@@ -31,7 +31,7 @@ A comprehensive, gamified web application designed to track, analyse, and optimi
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/your-username/cold-approach-tracker.git
+   git clone https://github.com/JimCodesNothing/cold-approach-tracker.git
    cd cold-approach-tracker
    ```
 2. **Create a virtual environment** (recommended):
