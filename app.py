@@ -4,7 +4,11 @@ import streamlit as st
 
 # ---------- Page config ----------
 st.set_page_config(page_title="Cold Approach Tracker", page_icon="🎯", layout="wide")
-
+# Add this right after st.set_page_config()
+if st.sidebar.button("🔄 Reset Session (Debug)"):
+    for key in list(st.session_state.keys()):
+        del st.session_state[key]
+    st.rerun()
 # ---------- Constants ----------
 RESULT_OPTIONS = ["", "Success", "Rejected", "Pending", "No Answer", "Voicemail", "Not Interested", "Callback Scheduled", "Other"]
 METHOD_OPTIONS = ["", "In-Person", "Phone Call", "Email", "LinkedIn DM", "Instagram DM", "Twitter DM", "Text Message", "Other"]
