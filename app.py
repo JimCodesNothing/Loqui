@@ -136,7 +136,7 @@ def load_from_csv(uploaded_file):
 
 # ---------- UI ----------
 # Debug: Reset session
-if st.sidebar.button("🔄 Reset Session (Debug)"):
+if st.sidebar.button("🔄 Reset Session (Debug)", key="reset_session_btn"):
     for key in list(st.session_state.keys()):
         del st.session_state[key]
     st.rerun()
