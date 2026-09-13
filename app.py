@@ -1,7 +1,84 @@
 import datetime
 import pandas as pd
 import streamlit as st
+import streamlit.components.v1 as components
 
+def play_sound(sound_type="success"):
+    """Play a sound using Web Audio API (no files needed)."""
+    if sound_type == "success":
+        # Pleasant ascending chime (C5-E5-G5 major chord)
+        js_code = """
+        <script>
+        (function() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const notes = [523.25, 659.25, 783.99];
+                notes.forEach((freq, i) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.frequency.value = freq;
+                    osc.type = 'sine';
+                    const startTime = ctx.currentTime + i * 0.08;
+                    gain.gain.setValueAtTime(0.001, startTime);
+                    gain.gain.exponentialRampToValueAtTime(0.3, startTime + 0.02);
+                    gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.4);
+                    osc.start(startTime);
+                    osc.stop(startTime + 0.4);
+                });
+            } catch(e) { console.log('Audio error:', e); }
+        })();
+        </script>
+        """
+    elif sound_type == "achievement":
+        # Triumphant fanfare (bigger chord)
+        js_code = """
+        <script>
+        (function() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const notes = [392, 523.25, 659.25, 783.99, 1046.5];
+                notes.forEach((freq, i) => {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.frequency.value = freq;
+                    osc.type = 'triangle';
+                    const startTime = ctx.currentTime + i * 0.1;
+                    gain.gain.setValueAtTime(0.001, startTime);
+                    gain.gain.exponentialRampToValueAtTime(0.25, startTime + 0.03);
+                    gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.6);
+                    osc.start(startTime);
+                    osc.stop(startTime + 0.6);
+                });
+            } catch(e) { console.log('Audio error:', e); }
+        })();
+        </script>
+        """
+    elif sound_type == "challenge":
+        # Quick celebratory ding
+        js_code = """
+        <script>
+        (function() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.frequency.value = 880;
+                osc.type = 'sine';
+                gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.5);
+            } catch(e) { console.log('Audio error:', e); }
+        })();
+        </script>
+        """
+    components.html(js_code, height=0)
 # ---------- Page config ----------
 st.set_page_config(page_title="Cold Approach Tracker", page_icon="🎯", layout="wide")
 # Add this right after st.set_page_config()
@@ -174,9 +251,11 @@ with tab1:
                 "Notes": notes_val.strip(),
                 "FollowUp": followup_val.strftime("%Y-%m-%d") if followup_val else "",
             }
-            st.session_state.approach_log.append(entry)
-            st.success(f"✅ Logged! Total: {len(st.session_state.approach_log)}")
-            st.rerun()
+           st.session_state.approach_log.append(entry)
+save_data()
+play_sound("success")  # 🎵 Play success chime
+st.success(f"✅ Logged! Total: {len(st.session_state.approach_log)}")
+st.rerun()
 
 # ===== TAB 2: VIEW ALL =====
 with tab2:
@@ -255,12 +334,19 @@ with tab4:
     
     st.success(f"You've unlocked **{len(unlocked)} / {len(ACHIEVEMENTS)}** achievements!")
     
-    if unlocked:
-        st.markdown("**✅ Unlocked:**")
-        cols = st.columns(3)
-        for i, a in enumerate(unlocked):
-            with cols[i % 3]:
-                st.markdown(f"### {a['icon']} {a['name']}\n*{a['desc']}*")
+   if unlocked:
+    # Check for newly unlocked achievements
+    if "last_achievement_count" not in st.session_state:
+        st.session_state.last_achievement_count = 0
+    if len(unlocked) > st.session_state.last_achievement_count:
+        play_sound("achievement")  # 🎵 Play fanfare for new achievement!
+        st.session_state.last_achievement_count = len(unlocked)
+    
+    st.markdown("**✅ Unlocked:**")
+    cols = st.columns(3)
+    for i, a in enumerate(unlocked):
+        with cols[i % 3]:
+            st.markdown(f"### {a['icon']} {a['name']}\n*{a['desc']}*")
     
     if locked:
         st.markdown("**🔒 Locked:**")
@@ -295,16 +381,18 @@ with tab4:
     st.markdown(f"**📋 Log {goal1} approaches this month**")
     st.progress(prog1, text=f"{month_total} / {goal1}")
     if prog1 >= 1.0:
-        st.balloons()
-        st.success("🏆 Challenge complete!")
-    
+    play_sound("challenge")  # 🎵 Play celebration ding
+    st.balloons()
+    st.success("🏆 Challenge complete!")
     # Challenge 2: Monthly successes
     goal2 = st.session_state.challenge_successes
     prog2 = min(month_successes / goal2, 1.0)
     st.markdown(f"**🎯 Get {goal2} successes this month**")
     st.progress(prog2, text=f"{month_successes} / {goal2}")
-    if prog2 >= 1.0:
-        st.success("🏆 Challenge complete!")
+   if prog2 >= 1.0:
+    play_sound("challenge")  # 🎵 Play celebration ding
+    st.balloons()
+    st.success("🏆 Challenge complete!")
     
     # Challenge 3: Streak
     goal3 = st.session_state.challenge_streak
@@ -312,7 +400,9 @@ with tab4:
     st.markdown(f"**🔥 Maintain a {goal3}-day streak**")
     st.progress(prog3, text=f"{current_streak} / {goal3}")
     if prog3 >= 1.0:
-        st.success("🏆 Challenge complete!")
+    play_sound("challenge")  # 🎵 Play celebration ding
+    st.balloons()
+    st.success("🏆 Challenge complete!")
 
 # ===== TAB 5: SAVE / LOAD =====
 with tab5:
